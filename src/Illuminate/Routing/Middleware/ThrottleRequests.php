@@ -3,8 +3,8 @@
 namespace Illuminate\Routing\Middleware;
 
 use Closure;
-use Illuminate\Http\Response;
 use Illuminate\Cache\RateLimiter;
+use Symfony\Component\HttpFoundation\Response;
 
 class ThrottleRequests
 {
@@ -85,11 +85,11 @@ class ThrottleRequests
     /**
      * Add the limit header information to the given response.
      *
-     * @param  \Illuminate\Http\Response  $response
+     * @param  \Symfony\Component\HttpFoundation\Response  $response
      * @param  int  $maxAttempts
      * @param  int  $remainingAttempts
      * @param  int|null  $retryAfter
-     * @return \Illuminate\Http\Response
+     * @return \Symfony\Component\HttpFoundation\Response
      */
     protected function addHeaders(Response $response, $maxAttempts, $remainingAttempts, $retryAfter = null)
     {
