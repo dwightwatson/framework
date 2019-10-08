@@ -3,7 +3,9 @@
 namespace Illuminate\Routing\Middleware;
 
 use Closure;
+use Illuminate\Routing\Exceptions\ExpiredSignatureException;
 use Illuminate\Routing\Exceptions\InvalidSignatureException;
+use Illuminate\Support\Carbon;
 
 class ValidateSignature
 {
@@ -18,10 +20,25 @@ class ValidateSignature
      */
     public function handle($request, Closure $next)
     {
-        if ($request->hasValidSignature()) {
-            return $next($request);
+        if (! $request->hasValidSignature()) {
+            throw $this->hasExpiredSignature($request)
+                ? new ExpiredSignatureException
+                : new InvalidSignatureException;
         }
 
-        throw new InvalidSignatureException;
+        return $next($request);
+    }
+
+    /**
+     * Determine if the signature has expired.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return bool
+     */
+    protected function hasExpiredSignature($request)
+    {
+        $expires = $request->query('expires');
+
+        return $expires && Carbon::now()->getTimestamp() > $expires;
     }
 }
