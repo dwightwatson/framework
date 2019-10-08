@@ -355,10 +355,12 @@ class UrlGenerator implements UrlGeneratorContract
      */
     public function hasExpiredSignature(Request $request, $absolute = true)
     {
-        $expires = $request->query('expires');
+        if (! $request->has('expires')) {
+            return false;
+        }
 
         return $this->hasMatchingSignature($request, $absolute) &&
-            ($expires && Carbon::now()->getTimestamp() > $expires);
+            Carbon::now()->getTimestamp() > $request->query('expires');
     }
 
     /**
