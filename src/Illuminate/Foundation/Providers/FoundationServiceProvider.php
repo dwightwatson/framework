@@ -65,8 +65,8 @@ class FoundationServiceProvider extends AggregateServiceProvider
             return URL::hasValidSignature($this, $absolute);
         });
 
-        Request::macro('hasExpiredSignature', function () {
-            return URL::hasExpiredSignature($this);
+        Request::macro('hasExpiredSignature', function ($absolute = true) {
+            return URL::hasExpiredSignature($this, $absolute);
         });
     }
 }

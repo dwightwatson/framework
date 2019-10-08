@@ -350,13 +350,15 @@ class UrlGenerator implements UrlGeneratorContract
      * Determine if the request has an expired signature.
      *
      * @param  \Illuminate\Http\Request  $request
+     * @param  bool  $absolute
      * @return bool
      */
-    public function hasExpiredSignature(Request $request)
+    public function hasExpiredSignature(Request $request, $absolute = true)
     {
         $expires = $request->query('expires');
 
-        return $expires && Carbon::now()->getTimestamp() > $expires;
+        return $this->hasMatchingSignature($request, $absolute) &&
+            ($expires && Carbon::now()->getTimestamp() > $expires);
     }
 
     /**
@@ -368,6 +370,21 @@ class UrlGenerator implements UrlGeneratorContract
      */
     public function hasValidSignature(Request $request, $absolute = true)
     {
+        $expires = $request->query('expires');
+
+        return $this->hasMatchingSignature($request, $absolute) &&
+            ! ($expires && Carbon::now()->getTimestamp() > $expires);
+    }
+
+    /**
+     * Determine if the given request's signature matches the URL.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  bool  $absolute
+     * @return bool
+     */
+    protected function hasMatchingSignature(Request $request, $absolute = true)
+    {
         $url = $absolute ? $request->url() : '/'.$request->path();
 
         $original = rtrim($url.'?'.Arr::query(
@@ -376,8 +393,7 @@ class UrlGenerator implements UrlGeneratorContract
 
         $signature = hash_hmac('sha256', $original, call_user_func($this->keyResolver));
 
-        return hash_equals($signature, (string) $request->query('signature', '')) &&
-               ! $this->hasExpiredSignature($request);
+        return hash_equals($signature, (string) $request->query('signature', ''));
     }
 
     /**

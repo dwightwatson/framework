@@ -52,6 +52,17 @@ class ValidateSignatureTest extends TestCase
         $this->middleware->handle($request, $this->callback);
     }
 
+    public function testItThrowsForExpiredExpiredSignature()
+    {
+        $this->expectExceptionMessage('Invalid signature.');
+
+        $url = URL::signedRoute('foo', [], now()->subDay());
+
+        $request = Request::create($url.'invalid', 'GET');
+
+        $this->middleware->handle($request, $this->callback);
+    }
+
     public function testItHandlesValidSignature()
     {
         $url = URL::signedRoute('foo', [], now()->addDay());
