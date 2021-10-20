@@ -116,6 +116,41 @@ class FoundationAuthorizesRequestsTraitTest extends TestCase
         $this->assertTrue($_SERVER['_test.authorizes.trait.policy']);
     }
 
+    public function testPolicyMethodMayBeGuessedAndNormalizedWithArgument()
+    {
+        unset($_SERVER['_test.authorizes.trait.policy']);
+
+        $gate = $this->getBasicGate();
+
+        $gate->policy(FoundationAuthorizesRequestTestClass::class, FoundationAuthorizesRequestTestPolicy::class);
+
+        (new FoundationTestAuthorizeTraitClass)->store($instance = new FoundationAuthorizesRequestTestClass, 'argument');
+
+        $this->assertTrue($_SERVER['_test.authorizes.trait.policy']);
+        $this->assertSame($instance, $_SERVER['_test.authorizes.trait.arguments'][0]);
+        $this->assertEquals('argument', $_SERVER['_test.authorizes.trait.arguments'][1]);
+    }
+
+        public function testPolicyMethodMayBeGuessedAndNormalizedWithArguments()
+        {
+            unset($_SERVER['_test.authorizes.trait.policy']);
+
+            $gate = $this->getBasicGate();
+
+            $gate->policy(FoundationAuthorizesRequestTestClass::class, FoundationAuthorizesRequestTestPolicy::class);
+
+            (new FoundationTestAuthorizeTraitClass)->store(
+                $instance = new FoundationAuthorizesRequestTestClass,
+                ['argument', 'argument']
+            );
+
+            $this->assertTrue($_SERVER['_test.authorizes.trait.policy']);
+
+            $this->assertSame($instance, $_SERVER['_test.authorizes.trait.arguments'][0]);
+            $this->assertEquals('argument', $_SERVER['_test.authorizes.trait.arguments'][1]);
+            $this->assertEquals('argument', $_SERVER['_test.authorizes.trait.arguments'][2]);
+        }
+
     public function getBasicGate()
     {
         $container = Container::setInstance(new Container);
@@ -137,9 +172,10 @@ class FoundationAuthorizesRequestTestClass
 
 class FoundationAuthorizesRequestTestPolicy
 {
-    public function create()
+    public function create($object, ...$arguments)
     {
         $_SERVER['_test.authorizes.trait.policy'] = true;
+        $_SERVER['_test.authorizes.trait.arguments'] = $arguments;
 
         return true;
     }
@@ -163,15 +199,15 @@ class FoundationAuthorizesRequestTestPolicy
         $_SERVER['_test.authorizes.trait.policy'] = true;
 
         return true;
-    }
+     }
 }
 
 class FoundationTestAuthorizeTraitClass
 {
     use AuthorizesRequests;
 
-    public function store($object)
+    public function store($object, $arguments = [])
     {
-        $this->authorize($object);
+        $this->authorize($object, $arguments);
     }
 }

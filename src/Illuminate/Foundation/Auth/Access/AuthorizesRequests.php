@@ -3,6 +3,7 @@
 namespace Illuminate\Foundation\Auth\Access;
 
 use Illuminate\Contracts\Auth\Access\Gate;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 
 trait AuthorizesRequests
@@ -59,7 +60,9 @@ trait AuthorizesRequests
 
         $method = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 3)[2]['function'];
 
-        return [$this->normalizeGuessedAbilityName($method), $ability];
+        $arguments = [$ability, ...Arr::wrap($arguments)];
+
+        return [$this->normalizeGuessedAbilityName($method), $arguments];
     }
 
     /**
