@@ -218,7 +218,7 @@ class PendingSingletonResourceRegistration
      * Define which routes should allow "trashed" models to be retrieved when resolving implicit model bindings.
      *
      * @param  array  $methods
-     * @return \Illuminate\Routing\PendingResourceRegistration
+     * @return \Illuminate\Routing\PendingSingletonResourceRegistration
      */
     public function withTrashed(array $methods = [])
     {
